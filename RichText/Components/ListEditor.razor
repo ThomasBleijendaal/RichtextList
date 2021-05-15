@@ -1,0 +1,15 @@
+﻿<ul class="editor-level">
+    @foreach (var element in Interaction.Elements)
+    {
+        <li class="editor-node" @key="@element.Data.Id">
+            <ContentEditableComponent @bind-Value="@element.Data.Description"
+                                      Element="@element"
+                                      KeyPress="@((ev) => HandleKeyPress(ev, element))" />
+
+            @if (element.NestedList != null)
+            {
+                <ListEditor Interaction="element.NestedList" />
+            }
+        </li>
+    }
+</ul>

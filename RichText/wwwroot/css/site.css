@@ -1,0 +1,35 @@
+@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
+html, body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    background: #edebe9;
+}
+
+.list-editor {
+    border: 1px solid #8a8886;
+    background: #fff;
+    padding: 1rem;
+    margin: 2rem 1rem;
+    display: block;
+}
+
+    .list-editor .editor-level {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .list-editor .editor-node {
+        padding: 0;
+        margin: 0;
+    }
+
+        .list-editor .editor-node .editor-level {
+            margin-left: 2rem;
+        }
+
+        .list-editor .editor-node textarea {
+            padding: 1rem;
+            width: 100%;
+            height: 2rem;
+        }

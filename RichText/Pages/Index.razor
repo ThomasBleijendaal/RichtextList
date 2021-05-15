@@ -1,0 +1,21 @@
+﻿@page "/"
+
+    <div class="list-editor">
+        <ListEditor Interaction="Interaction" />
+    </div>
+
+    @code {
+        public ListInteraction Interaction { get; set; } = default!;
+
+        protected override Task OnInitializedAsync()
+        {
+            Interaction = new ListInteraction(
+                new[]
+                {
+                    new Ticket(Guid.NewGuid().ToString(), "New item")
+                },
+                default);
+
+            return base.OnInitializedAsync();
+        }
+    } 
