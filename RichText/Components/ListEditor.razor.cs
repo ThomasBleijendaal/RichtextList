@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.AspNetCore.Components;
 using RichText.Abstractions;
-using RichText.Entities;
 using RichText.Enums;
 using RichText.EventArgs;
 using RichText.State;
@@ -13,6 +12,11 @@ namespace RichText.Components
     /*
      TODO: more flexible editor inside editor + validation 
     + require interface for data object
+    
+    + add support for:
+    - reordering stuff
+    - select items in bulk
+    - 
      */
     public partial class ListEditor : IDisposable
     {
@@ -37,16 +41,19 @@ namespace RichText.Components
 
             var keyPressSuccessful = args.Key switch
             {
-                Keys.Enter when source.IsSaveable => State.AddElement(new Ticket(), source),
+                Keys.Enter when source.IsSaveable => State.AddElement(source),
                 Keys.Up => State.SelectElementPreviousOf(source, args.Modifiers == ModifierKeys.Control),
                 Keys.Down => State.SelectElementNextOf(source, args.Modifiers == ModifierKeys.Control),
-                Keys.Tab when args.Modifiers == ModifierKeys.Shift => State.Demote(source),
-                Keys.Tab => State.Promote(source),
+                Keys.Tab when args.Modifiers == ModifierKeys.Shift => State.Promote(source),
+                Keys.Tab => State.Demote(source),
 
                 _ => default(bool?)
             };
 
-            StateHasChanged();
+            if (keyPressSuccessful != null)
+            {
+                StateHasChanged();
+            }
 
             if (keyPressSuccessful == true)
             {
@@ -56,6 +63,7 @@ namespace RichText.Components
 
         private async Task HandleDefocusAsync(IEntity source)
         {
+            // TODO: when making edits while saving leads to chaos
             await State.SaveElementAsync(source);
         }
 

@@ -8,5 +8,11 @@ namespace RichText.Abstractions
         Task<IEnumerable<IEntity>> GetListAsync();
 
         Task<IEntity> UpsertEntityAsync(IEntity entity);
+
+        IEntity CreateNewEntity(IEntity? parentEntity);
+
+        IEntity? ConvertEntityUp(IEntity lowerEntity);
+
+        IEntity? ConvertEntityDown(IEntity higherEntity);        
     }
 }

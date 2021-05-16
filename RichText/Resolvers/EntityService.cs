@@ -1,32 +1,70 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using RichText.Abstractions;
 using RichText.Entities;
 
 namespace RichText.Resolvers
 {
+    // TODO: support dynamic configuration of down and up casting
     public class EntityService : IEntityService
     {
+        public IEntity? ConvertEntityDown(IEntity higherEntity)
+        {
+            return higherEntity switch
+            {
+                Epic => new UserStory(higherEntity.Id, higherEntity.Name),
+                UserStory => new UserStoryTask(higherEntity.Id, higherEntity.Name),
+                UserStoryTask => new SubTask(higherEntity.Id, higherEntity.Name),
+
+                _ => default
+            };
+        }
+
+        public IEntity? ConvertEntityUp(IEntity lowerEntity)
+        {
+            return lowerEntity switch
+            {
+                UserStory => new Epic(lowerEntity.Id, lowerEntity.Name),
+                UserStoryTask => new UserStory(lowerEntity.Id, lowerEntity.Name),
+                SubTask => new UserStoryTask(lowerEntity.Id, lowerEntity.Name),
+
+                _ => default
+            };
+        }
+
+        public IEntity CreateNewEntity(IEntity? parentEntity)
+        {
+            return parentEntity switch
+            {
+                Epic => new UserStory(),
+                UserStory => new UserStoryTask(),
+                UserStoryTask => new SubTask(),
+
+                _ => new Epic()
+            };
+        }
+
         public async Task<IEnumerable<IEntity>> GetListAsync()
         {
             await Task.Delay(1);
 
             return new[]
             { 
-                new Ticket 
+                new Epic 
                 {
                     Id = "1",
                     Name = "1",
                     SubEntities = new []
                     {
-                        new Ticket
+                        new UserStory
                         {
                             Id = "11",
                             Name = "11"
                         }
                     }
                 },
-                new Ticket
+                new Epic
                 {
                     Id = "2",
                     Name = "2"

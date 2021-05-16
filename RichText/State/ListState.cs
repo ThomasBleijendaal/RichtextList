@@ -87,22 +87,10 @@ namespace RichText.State
             StateHasChanged?.Invoke(this, new System.EventArgs());
         }
 
-        public bool AddElement(IEntity entity, IEntity? after)
+        public bool AddElement(IEntity? after)
         {
-            var index = GetIndex(after) + 1;
-
-            var newItem = new ListElement<IEntity>(entity, true);
-
-            if (index < _elements.Count)
-            {
-                _elements.Insert(index, newItem);
-            }
-            else
-            {
-                _elements.Add(newItem);
-            }
-
-            return true;
+            var newEntity = _entityService.CreateNewEntity(_parentEntity);
+            return AddElement(newEntity, after);
         }
 
         public bool SelectElementPreviousOf(IEntity entity, bool skipNestedList)
@@ -208,7 +196,7 @@ namespace RichText.State
         public bool IsFirst(IEntity entity)
             => GetIndex(entity) == 0;
 
-        public bool Demote(IEntity entity)
+        public bool Promote(IEntity entity)
         {
             if (_parent == null)
             {
@@ -216,7 +204,13 @@ namespace RichText.State
             }
 
             var index = GetIndex(entity);
-            if (index < _elements.Count - 1)
+            if (index < 0)
+            {
+                return false;
+            }
+
+            var promotedEntity = _entityService.ConvertEntityUp(entity);
+            if (promotedEntity == null)
             {
                 return false;
             }
@@ -225,13 +219,13 @@ namespace RichText.State
 
             var parentIndex = _parent.GetIndex(this);
 
-            _parent.AddElement(entity, _parent.Elements[parentIndex].Entity);
+            _parent.AddElement(promotedEntity, _parent.Elements[parentIndex].Entity);
             _parent.StateHasChanged?.Invoke(this, new System.EventArgs());
 
             return true;
         }
 
-        public bool Promote(IEntity entity)
+        public bool Demote(IEntity entity)
         {
             var index = GetIndex(entity);
             if (index < 1)
@@ -244,12 +238,36 @@ namespace RichText.State
                 return false;
             }
 
+            var demotedEntity = _entityService.ConvertEntityDown(entity);
+            if (demotedEntity == null)
+            {
+                return false;
+            }
+
             var newRoot = _elements[index - 1];
 
             _elements.RemoveAt(index);
 
             newRoot.NestedList ??= new ListState(_entityService, newRoot.Entity, this);
-            newRoot.NestedList.AddElement(entity, newRoot.NestedList.Elements.Any() ? newRoot.NestedList.Elements[^1].Entity : default);
+            newRoot.NestedList.AddElement(demotedEntity, newRoot.NestedList.Elements.Any() ? newRoot.NestedList.Elements[^1].Entity : default);
+
+            return true;
+        }
+
+        private bool AddElement(IEntity entity, IEntity? after)
+        {
+            var index = GetIndex(after) + 1;
+
+            var newItem = new ListElement<IEntity>(entity, true);
+
+            if (index < _elements.Count)
+            {
+                _elements.Insert(index, newItem);
+            }
+            else
+            {
+                _elements.Add(newItem);
+            }
 
             return true;
         }

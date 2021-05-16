@@ -4,6 +4,8 @@
     {
         New = 1,
         Existing = 2,
-        Saving = 3
+        Modified = 3,
+        Saving = 4,
+        Deleting = 5
     }
 }
