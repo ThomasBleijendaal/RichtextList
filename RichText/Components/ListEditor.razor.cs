@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.AspNetCore.Components;
+using RichText.Abstractions;
+using RichText.Entities;
 using RichText.Enums;
 using RichText.EventArgs;
-using RichText.Interactions;
+using RichText.State;
 
 namespace RichText.Components
 {
@@ -13,13 +16,11 @@ namespace RichText.Components
      */
     public partial class ListEditor : IDisposable
     {
-        [Parameter] public ListInteraction Interaction { get; set; } = default!;
+        [Parameter] public ListState State { get; set; } = default!;
 
-        protected override void OnParametersSet()
+        protected override void OnInitialized()
         {
-            base.OnParametersSet();
-
-            Interaction.StateHasChanged += StateHasChangedAsync;
+            State.StateHasChanged += StateHasChangedAsync;
         }
 
         private async void StateHasChangedAsync(object? sender, System.EventArgs e)
@@ -27,42 +28,45 @@ namespace RichText.Components
             await InvokeAsync(() => StateHasChanged());
         }
 
-        private void HandleKeyPress(KeyEventArgs args, ListElement<Ticket> source)
+        private async Task HandleKeyPressAsync(KeyEventArgs args, IEntity source)
         {
-            switch (args.Key)
+            if (State == null)
             {
-                case Keys.Enter:
-                    if (!string.IsNullOrWhiteSpace(source.Data.Description))
-                    {
-                        Interaction.AddElement(new Ticket(), source.Data);
-                    }
-                    break;
+                return;
+            }
 
-                case Keys.Up:
-                    Interaction.SelectElementPreviousOf(source.Data, args.Modifiers == ModifierKeys.Control);
-                    break;
+            var keyPressSuccessful = args.Key switch
+            {
+                Keys.Enter when source.IsSaveable => State.AddElement(new Ticket(), source),
+                Keys.Up => State.SelectElementPreviousOf(source, args.Modifiers == ModifierKeys.Control),
+                Keys.Down => State.SelectElementNextOf(source, args.Modifiers == ModifierKeys.Control),
+                Keys.Tab when args.Modifiers == ModifierKeys.Shift => State.Demote(source),
+                Keys.Tab => State.Promote(source),
 
-                case Keys.Down:
-                    Interaction.SelectElementNextOf(source.Data, args.Modifiers == ModifierKeys.Control);
-                    break;
-
-                case Keys.Tab:
-                    if (args.Modifiers == ModifierKeys.Shift)
-                    {
-                        Interaction.Demote(source.Data);
-                    }
-                    else
-                    {
-                        Interaction.Promote(source.Data);
-                    }
-                    break;
-
-                default: return;
+                _ => default(bool?)
             };
+
+            StateHasChanged();
+
+            if (keyPressSuccessful == true)
+            {
+                await HandleDefocusAsync(source);
+            }
         }
+
+        private async Task HandleDefocusAsync(IEntity source)
+        {
+            await State.SaveElementAsync(source);
+        }
+
         public void Dispose()
         {
-            Interaction.StateHasChanged -= StateHasChangedAsync;
+            if (State == null)
+            {
+                return;
+            }
+
+            State.StateHasChanged -= StateHasChangedAsync;
         }
 
     }

@@ -1,21 +1,21 @@
 ﻿@page "/"
 
-    <div class="list-editor">
-        <ListEditor Interaction="Interaction" />
-    </div>
+<div class="list-editor">
+    @if (State != null)
+    {
+        <ListEditor State="State" />
+    }
+</div>
 
-    @code {
-        public ListInteraction Interaction { get; set; } = default!;
+@code {
+    [Inject] private IEntityService EntityService { get; set; } = default!;
 
-        protected override Task OnInitializedAsync()
-        {
-            Interaction = new ListInteraction(
-                new[]
-                {
-                    new Ticket(Guid.NewGuid().ToString(), "New item")
-                },
-                default);
+    private ListState? State { get; set; }
 
-            return base.OnInitializedAsync();
-        }
-    } 
+    protected override async Task OnParametersSetAsync()
+    {
+        var entities = await EntityService.GetListAsync();
+
+        State = new ListState(EntityService, entities, default, default);
+    }
+}

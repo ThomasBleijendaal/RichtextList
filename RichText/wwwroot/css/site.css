@@ -29,7 +29,10 @@ html, body {
         }
 
         .list-editor .editor-node textarea {
-            padding: 1rem;
+            padding: .2rem;
             width: 100%;
             height: 2rem;
+            overflow: hidden;
+            border-radius: 0 !important;
+            outline: 0 !important;
         }

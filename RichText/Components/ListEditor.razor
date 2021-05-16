@@ -1,15 +1,26 @@
-﻿<ul class="editor-level">
-    @foreach (var element in Interaction.Elements)
-    {
-        <li class="editor-node" @key="@element.Data.Id">
-            <ContentEditableComponent @bind-Value="@element.Data.Description"
-                                      Element="@element"
-                                      KeyPress="@((ev) => HandleKeyPress(ev, element))" />
+﻿@if (State != null)
+{
+    <ul class="editor-level">
+        @foreach (var element in State.Elements)
+        {
+            <li class="editor-node" @key="@element.Entity.Id">
+                <div class="row">
+                    <div class="col-1">
+                        @element.State
+                    </div>
+                    <ContentEditableComponent @bind-Value="@element.Entity.Name"
+                                              CSSClass="col-10"
+                                              Element="@element"
+                                              KeyPress="@(async (ev) => await HandleKeyPressAsync(ev, element.Entity))" />
+                    <div class="col-1">
 
-            @if (element.NestedList != null)
-            {
-                <ListEditor Interaction="element.NestedList" />
-            }
-        </li>
-    }
-</ul>
+                    </div>
+                </div>
+                @if (element.NestedList != null)
+                {
+                    <ListEditor State="element.NestedList" />
+                }
+            </li>
+        }
+    </ul>
+}

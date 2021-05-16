@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using RichText.Enums;
 using RichText.EventArgs;
-using RichText.Interactions;
+using RichText.Models;
 
 namespace RichText.Components.Editors
 {
