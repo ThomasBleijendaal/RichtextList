@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RichText.Abstractions;
-using RichText.Resolvers;
+using RichText.Services;
 
 namespace RichText
 {

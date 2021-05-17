@@ -3,20 +3,29 @@
 html, body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     background: #edebe9;
+    margin: 0;
+    padding: 0;
 }
 
 .list-editor {
-    border: 1px solid #8a8886;
     background: #fff;
     padding: 1rem;
-    margin: 2rem 1rem;
+    margin: 1rem 1rem;
     display: block;
+    box-shadow: 0 6.4px 14.4px 0 rgba(0,0,0,.132),0 1.2px 3.6px 0 rgba(0,0,0,.108);
 }
 
     .list-editor .editor-level {
         list-style: none;
         padding: 0;
         margin: 0;
+    }
+
+    .list-editor > .editor-level > .editor-node {
+        border-left-width: .3rem;
+        border-left-style: solid;
+        margin: 0 0 .5rem 0;
+        padding: .5rem 0 0 1rem;
     }
 
     .list-editor .editor-node {

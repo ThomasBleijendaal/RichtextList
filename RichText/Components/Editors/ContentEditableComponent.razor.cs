@@ -17,10 +17,8 @@ namespace RichText.Components.Editors
 
     public partial class ContentEditableComponent
     {
-        private int _id { get; set; } = new Random().Next();
+        private string _id { get; set; } = Guid.NewGuid().ToString();
         
-        private readonly Dictionary<string, object> _attributesList = new();
-
         private ElementReference _elementRef;
 
         [Parameter] public string? Value { get; set; }
@@ -29,28 +27,11 @@ namespace RichText.Components.Editors
 
         [Parameter] public bool Enabled { get; set; } = true;
 
-        [Parameter] public string? CSSClass { get; set; }
-
         [Parameter] public EventCallback<string> ValueChanged { get; set; }
 
         [Parameter] public EventCallback<KeyEventArgs> KeyPress { get; set; }
 
         [Inject] private IJSRuntime _JSRuntime { get; set; } = default!;
-
-        protected override void OnInitialized()
-        {
-            //Enabled=false add disabled attribute to AttributesList
-            if (!Enabled)
-            {
-                _attributesList.Add("disabled", "disabled");
-            }
-
-            //add CSSClass if supplied
-            if (!string.IsNullOrWhiteSpace(CSSClass))
-            {
-                _attributesList.Add("class", CSSClass);
-            }
-        }
 
         //send initial text (if supplied) to javascript to place in the div
         protected override async Task OnAfterRenderAsync(bool firstRender)

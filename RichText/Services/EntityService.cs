@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using RichText.Abstractions;
 using RichText.Entities;
 
-namespace RichText.Resolvers
+namespace RichText.Services
 {
     // TODO: support dynamic configuration of down and up casting
     public class EntityService : IEntityService
@@ -14,8 +14,7 @@ namespace RichText.Resolvers
             return higherEntity switch
             {
                 Epic => new UserStory(higherEntity.Id, higherEntity.Name),
-                UserStory => new UserStoryTask(higherEntity.Id, higherEntity.Name),
-                UserStoryTask => new SubTask(higherEntity.Id, higherEntity.Name),
+                UserStory => new SubTask(higherEntity.Id, higherEntity.Name),
 
                 _ => default
             };
@@ -26,8 +25,7 @@ namespace RichText.Resolvers
             return lowerEntity switch
             {
                 UserStory => new Epic(lowerEntity.Id, lowerEntity.Name),
-                UserStoryTask => new UserStory(lowerEntity.Id, lowerEntity.Name),
-                SubTask => new UserStoryTask(lowerEntity.Id, lowerEntity.Name),
+                SubTask => new UserStory(lowerEntity.Id, lowerEntity.Name),
 
                 _ => default
             };
@@ -38,8 +36,7 @@ namespace RichText.Resolvers
             return parentEntity switch
             {
                 Epic => new UserStory(),
-                UserStory => new UserStoryTask(),
-                UserStoryTask => new SubTask(),
+                UserStory => new SubTask(),
 
                 _ => new Epic()
             };
@@ -50,8 +47,8 @@ namespace RichText.Resolvers
             await Task.Delay(1);
 
             return new[]
-            { 
-                new Epic 
+            {
+                new Epic
                 {
                     Id = "1",
                     Name = "1",
