@@ -1,48 +1,55 @@
 ﻿@if (State != null)
 {
     <ul class="editor-level">
-        @foreach (var element in State.Elements)
+        @if (string.IsNullOrWhiteSpace(Error))
         {
-            <li class="editor-node @(Class($"color_{new Random().Next(1,14)}"))" @key="@element.Entity.Id">
-                <div class="row">
-                    <div class="col-auto">
-                        <i class="ms-Icon ms-Icon--@(Icon(element.State))" aria-hidden="true"></i>
+            @foreach (var element in State.Elements)
+            {
+                <li class="editor-node @(Class(element.Entity))" @key="@element.Entity.Id">
+                    <div class="row">
+                        <div class="col-auto">
+                            <i class="ms-Icon ms-Icon--@(Icon(element.State))" aria-hidden="true"></i>
+                        </div>
+                        <div class="col">
+                            <ContentEditableComponent @bind-Value="@element.Entity.Name"
+                                                      Element="@element"
+                                                      KeyPress="@(async (ev) => await HandleKeyPressAsync(ev, element.Entity))" />
+                        </div>
+                        <div class="col-auto">
+                            @element.Entity.Key
+                        </div>
                     </div>
-                    <div class="col-auto">
-                        @element.Entity.GetType().Name
-                    </div>
-                    <div class="col">
-                        <ContentEditableComponent @bind-Value="@element.Entity.Name"
-                                                  Element="@element"
-                                                  KeyPress="@(async (ev) => await HandleKeyPressAsync(ev, element.Entity))" />
-                    </div>
-                </div>
-                @if (element.NestedList != null)
-                {
-                    <ListEditor State="element.NestedList" />
-                }
-            </li>
+                    @if (element.NestedList != null)
+                    {
+                        <ListEditor State="element.NestedList" />
+                    }
+                </li>
+            }
+        }
+        else
+        {
+            <li class="bg-danger">@Error</li>
         }
     </ul>
 }
 
 @code {
-    public string Class(string color)
-        => "ms-borderColor-shared" + color switch
+    public string Class(IEntity entity)
+        => entity is not Epic epic ? "" : "ms-borderColor-shared" + epic.Color switch
         {
             "color_1" => "Orange30",
             "color_2" => "Orange10",
             "color_3" => "Yellow10",
             "color_4" => "CyanBlue20",
-            "color_5" => "CyanBlue10",
-            "color_6" => "Cyan20",
-            "color_7" => "Gray20",
-            "color_8" => "Gray10",
-            "color_9" => "Green10",
-            "color_10" => "Green20",
-            "color_11" => "PinkRed20",
-            "color_12" => "BlueMagenta20",
-            "color_13" => "Red10",
+            "color_10" => "CyanBlue10",
+            "color_11" => "Cyan20",
+            "color_5" => "Gray20",
+            "color_12" => "Gray10",
+            "color_6" => "Green10",
+            "color_13" => "Green20",
+            "color_7" => "MagentaPink10",
+            "color_8" => "BlueMagenta20",
+            "color_9" => "Red10",
             "color_14" => "Red20",
             _ => ""
         };

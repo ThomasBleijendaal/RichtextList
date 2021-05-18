@@ -13,53 +13,57 @@ namespace RichText.State
         private readonly List<ListElement<IEntity>> _elements;
         private readonly IEntityService _entityService;
         private readonly IEntity? _parentEntity;
+        private readonly IReadOnlyList<IEntity> _parentEntities;
         private readonly ListState? _parent;
 
         public event EventHandler<System.EventArgs>? StateHasChanged;
 
         public ListState(
-            IEntityService entityService, 
-            IEntity? parentEntity, 
+            IEntityService entityService,
+            IEntity? parentEntity,
+            IEnumerable<IEntity> parentEntities,
             ListState? parent)
         {
             _elements = new List<ListElement<IEntity>>();
             _entityService = entityService;
             _parentEntity = parentEntity;
+            _parentEntities = parentEntities.ToList();
             _parent = parent;
         }
 
         public ListState(
-            IEntityService entityService, 
-            IEnumerable<IEntity> entities, 
-            IEntity? parentEntity, 
-            ListState? parent) 
-            : this(entityService, parentEntity, parent)
+            IEntityService entityService,
+            IEnumerable<IEntity> entities,
+            IEntity? parentEntity,
+            IEnumerable<IEntity> parentEntities,
+            ListState? parent)
+            : this(entityService, parentEntity, parentEntities, parent)
         {
-            FillEntities(entities, this);
+            FillEntities(entities, this, parentEntities);
         }
 
-        private void FillEntities(IEnumerable<IEntity> entities, ListState listState)
+        private void FillEntities(IEnumerable<IEntity> entities, ListState listState, IEnumerable<IEntity> parentEntities)
         {
+
             foreach (var entity in entities)
             {
-                var element = new ListElement<IEntity>(entity)
-                {
-                    State = ElementState.Existing
-                };
+                var parents = parentEntities.Append(entity);
+
+                var element = new ListElement<IEntity>(entity);
 
                 listState._elements.Add(element);
 
                 if (entity.SubEntities != null)
                 {
-                    element.NestedList = new ListState(_entityService, entity, listState);
-                    FillEntities(entity.SubEntities, element.NestedList);
+                    element.NestedList = new ListState(_entityService, entity, parents, listState);
+                    FillEntities(entity.SubEntities, element.NestedList, parents);
                 }
             }
         }
 
         public IReadOnlyList<ListElement<IEntity>> Elements => _elements;
 
-        public string Id => _parentEntity?.Id ?? "::root";
+        public string Id => _parentEntity?.Key ?? "::root";
 
         public async Task SaveElementAsync(IEntity entity)
         {
@@ -79,7 +83,7 @@ namespace RichText.State
             _elements[index].State = ElementState.Saving;
             StateHasChanged?.Invoke(this, new System.EventArgs());
 
-            var replacementEntity = await _entityService.UpsertEntityAsync(entity);
+            var replacementEntity = await _entityService.UpsertEntityAsync(entity, _parentEntities);
 
             _elements[index].Entity = replacementEntity;
             _elements[index].State = ElementState.Existing;
@@ -190,13 +194,13 @@ namespace RichText.State
             return true;
         }
 
-        public void SelectFirstItem() 
+        public void SelectFirstItem()
             => _elements[0].Focus = true;
 
         public bool IsFirst(IEntity entity)
             => GetIndex(entity) == 0;
 
-        public bool Promote(IEntity entity)
+        public async Task<bool> PromoteAsync(IEntity entity)
         {
             if (_parent == null)
             {
@@ -209,7 +213,7 @@ namespace RichText.State
                 return false;
             }
 
-            var promotedEntity = _entityService.ConvertEntityUp(entity);
+            var promotedEntity = await _entityService.ConvertEntityUpAsync(entity, _parentEntities);
             if (promotedEntity == null)
             {
                 return false;
@@ -225,7 +229,7 @@ namespace RichText.State
             return true;
         }
 
-        public bool Demote(IEntity entity)
+        public async Task<bool> DemoteAsync(IEntity entity)
         {
             var index = GetIndex(entity);
             if (index < 1)
@@ -238,17 +242,17 @@ namespace RichText.State
                 return false;
             }
 
-            var demotedEntity = _entityService.ConvertEntityDown(entity);
+            var newRoot = _elements[index - 1];
+
+            var demotedEntity = await _entityService.ConvertEntityDownAsync(entity, newRoot.Entity);
             if (demotedEntity == null)
             {
                 return false;
             }
 
-            var newRoot = _elements[index - 1];
-
             _elements.RemoveAt(index);
 
-            newRoot.NestedList ??= new ListState(_entityService, newRoot.Entity, this);
+            newRoot.NestedList ??= new ListState(_entityService, newRoot.Entity, _parentEntities.Append(newRoot.Entity), this);
             newRoot.NestedList.AddElement(demotedEntity, newRoot.NestedList.Elements.Any() ? newRoot.NestedList.Elements[^1].Entity : default);
 
             return true;

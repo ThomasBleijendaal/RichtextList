@@ -22,6 +22,8 @@ namespace RichText.Components
     {
         [Parameter] public ListState State { get; set; } = default!;
 
+        private string? Error { get; set; }
+
         protected override void OnInitialized()
         {
             State.StateHasChanged += StateHasChangedAsync;
@@ -39,13 +41,33 @@ namespace RichText.Components
                 return;
             }
 
+            try
+            {
+                try
+                {
+                    await ProcessKeyPressAsync(args, source);
+                }
+                catch
+                {
+                    // retry once
+                    await ProcessKeyPressAsync(args, source);
+                }
+            }
+            catch (Exception ex)
+            {
+                Error = ex.Message;
+            }
+        }
+
+        private async Task ProcessKeyPressAsync(KeyEventArgs args, IEntity source)
+        {
             var keyPressSuccessful = args.Key switch
             {
                 Keys.Enter when source.IsSaveable => State.AddElement(source),
                 Keys.Up => State.SelectElementPreviousOf(source, args.Modifiers == ModifierKeys.Control),
                 Keys.Down => State.SelectElementNextOf(source, args.Modifiers == ModifierKeys.Control),
-                Keys.Tab when args.Modifiers == ModifierKeys.Shift => State.Promote(source),
-                Keys.Tab => State.Demote(source),
+                Keys.Tab when args.Modifiers == ModifierKeys.Shift => await State.PromoteAsync(source),
+                Keys.Tab => await State.DemoteAsync(source),
 
                 _ => default(bool?)
             };

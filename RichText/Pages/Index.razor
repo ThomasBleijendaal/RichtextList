@@ -16,6 +16,6 @@
     {
         var entities = await EntityService.GetListAsync();
 
-        State = new ListState(EntityService, entities, default, default);
+        State = new ListState(EntityService, entities, default, Enumerable.Empty<IEntity>(), default);
     }
 }
