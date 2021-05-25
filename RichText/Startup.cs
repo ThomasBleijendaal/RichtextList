@@ -12,6 +12,7 @@ using RichText.Handlers.QueryHandlers;
 using RichText.Queries;
 using RichText.Resolvers;
 using RichText.Services;
+using RichText.State;
 
 namespace RichText
 {
@@ -31,11 +32,18 @@ namespace RichText
             services.AddRazorPages();
             services.AddServerSideBlazor();
 
+            services.AddSingleton<IAppState, AppState>();
+
             services.AddSingleton<IEntityService, EntityService>();
 
+            services.AddSingleton<IQueryHandler<GetMetaQuery, Meta>, GetMetaQueryHandler>();
+            services.AddSingleton<IQueryHandler<GetFieldQuery, Field>, GetFieldQueryHandler>();
+            services.AddSingleton<IQueryHandler<GetBoardsQuery, IReadOnlyList<Board>>, GetBoardsQueryHandler>();
             services.AddSingleton<IQueryHandler<GetEpicsQuery, IReadOnlyList<Epic>>, GetEpicsQueryHandler>();
             services.AddSingleton<IQueryHandler<GetUserStoriesQuery, IReadOnlyList<UserStory>>, GetUserStoriesQueryHandler>();
 
+            services.AddSingleton<IResultResolver<Meta>, MetaResolver>();
+            services.AddSingleton<IResultsResolver<Board>, BoardResolver>();
             services.AddSingleton<IResultsResolver<Epic>, EpicResolver>();
             services.AddSingleton<IResultsResolver<UserStory>, UserStoryResolver>();
 

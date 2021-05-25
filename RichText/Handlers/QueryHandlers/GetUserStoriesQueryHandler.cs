@@ -12,8 +12,9 @@ namespace RichText.Handlers.QueryHandlers
         private readonly IResultsResolver<UserStory> _userStoryResultsResolver;
 
         public GetUserStoriesQueryHandler(
+            IAppState appState,
             IResultsResolver<UserStory> userStoryResultsResolver,
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
             _userStoryResultsResolver = userStoryResultsResolver;
         }

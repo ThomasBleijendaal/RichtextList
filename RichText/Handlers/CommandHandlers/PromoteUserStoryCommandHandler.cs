@@ -13,9 +13,10 @@ namespace RichText.Handlers.CommandHandlers
         private readonly ICommandHandler<UpsertEpicCommand> _upsertEpicCommandHandler;
 
         public PromoteUserStoryCommandHandler(
+            IAppState appState,
             ICommandHandler<DeleteUserStoryCommand> deleteUserStoryCommandHandler,
             ICommandHandler<UpsertEpicCommand> upsertEpicCommandHandler,
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
             _deleteUserStoryCommandHandler = deleteUserStoryCommandHandler;
             _upsertEpicCommandHandler = upsertEpicCommandHandler;

@@ -11,7 +11,8 @@ namespace RichText.Handlers.CommandHandlers
         ICommandHandler<DeleteSubTaskCommand>
     {
         public DeleteCommandHandler(
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IAppState appState,
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
         }
 

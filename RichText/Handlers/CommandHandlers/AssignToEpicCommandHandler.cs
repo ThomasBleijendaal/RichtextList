@@ -8,7 +8,8 @@ namespace RichText.Handlers.CommandHandlers
     public class AssignToEpicCommandHandler : BaseHandler, ICommandHandler<AssignToEpicCommand>
     {
         public AssignToEpicCommandHandler(
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IAppState appState,
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
         }
 

@@ -1,0 +1,35 @@
+﻿<div class="configure-board">
+    <h1>Pick JIRA board</h1>
+
+    @if (Boards != null)
+    {
+        foreach (var board in Boards.OfType<Board>())
+        {
+            <div class="row">
+                <div class="col">@board.Id</div>
+                <div class="col"><a href="@(AppState.Url)secure/RapidBoard.jspa?rapidView=@(board.Id)" target="_blank">@board.Name</a></div>
+                <div class="col">@board.Type</div>
+                <div class="col col-auto"><button @onclick="@((ev) => OpenBoard(board.Id))" disabled="@(board.Type != "scrum")" class="btn btn-link">Open board</button></div>
+            </div>
+        }
+    }
+</div>
+
+
+@code {
+    [Inject] public IEntityService EntityService { get; set; } = default!;
+
+    [Inject] private IAppState AppState { get; set; } = default!;
+
+    private IEnumerable<IEntity>? Boards { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Boards = await EntityService.GetListAsync();
+    }
+
+    private void OpenBoard(string boardId)
+    {
+        AppState.ConfigureBoard(boardId);
+    }
+} 

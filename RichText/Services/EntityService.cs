@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 using RichText.Abstractions;
 using RichText.Commands;
 using RichText.Entities;
+using RichText.Enums;
 using RichText.Queries;
 
 namespace RichText.Services
 {
     public class EntityService : IEntityService
     {
+        private readonly IAppState _appState;
+        private readonly IQueryHandler<GetBoardsQuery, IReadOnlyList<Board>> _getBoardsQueryHandler;
         private readonly IQueryHandler<GetEpicsQuery, IReadOnlyList<Epic>> _getEpicsQueryHandler;
         private readonly ICommandHandler<UpsertEpicCommand> _upsertEpicCommandHandler;
         private readonly ICommandHandler<UpsertUserStoryCommand> _upsertUserStoryCommandHandler;
@@ -21,6 +24,8 @@ namespace RichText.Services
         private readonly ICommandHandlerWithResponse<PromoteSubTaskCommand, IEntity> _promoteSubTaskCommandHandler;
 
         public EntityService(
+            IAppState appState,
+            IQueryHandler<GetBoardsQuery, IReadOnlyList<Board>> getBoardsQueryHandler,
             IQueryHandler<GetEpicsQuery, IReadOnlyList<Epic>> getEpicsQueryHandler,
             ICommandHandler<UpsertEpicCommand> upsertEpicCommandHandler,
             ICommandHandler<UpsertUserStoryCommand> upsertUserStoryCommandHandler,
@@ -30,6 +35,8 @@ namespace RichText.Services
             ICommandHandlerWithResponse<PromoteUserStoryCommand, IEntity> promoteUserStoryCommandHandler,
             ICommandHandlerWithResponse<PromoteSubTaskCommand, IEntity> promoteSubTaskCommandHandler)
         {
+            _appState = appState;
+            _getBoardsQueryHandler = getBoardsQueryHandler;
             _getEpicsQueryHandler = getEpicsQueryHandler;
             _upsertEpicCommandHandler = upsertEpicCommandHandler;
             _upsertUserStoryCommandHandler = upsertUserStoryCommandHandler;
@@ -47,7 +54,7 @@ namespace RichText.Services
                 var command = new DemoteEpicCommand
                 {
                     Epic = epic,
-                    ProjectId = "16100", // MAGIC
+                    ProjectId = _appState.ProjectId,
                     EpicId = parentEpic.Id
                 };
 
@@ -60,7 +67,7 @@ namespace RichText.Services
                 var command = new DemoteUserStoryCommand
                 {
                     UserStory = userStory,
-                    ProjectId = "16100", // MAGIC
+                    ProjectId = _appState.ProjectId,
                     UserStoryId = parentUserStory.Id
                 };
 
@@ -119,7 +126,20 @@ namespace RichText.Services
         }
 
         public async Task<IEnumerable<IEntity>> GetListAsync()
-            => await _getEpicsQueryHandler.QueryAsync(new GetEpicsQuery { BoardId = "258" }); // MAGIC
+        {
+            if (_appState.State == ViewState.NoBoardConfig)
+            {
+                return await _getBoardsQueryHandler.QueryAsync(new GetBoardsQuery());
+            }
+            else if (_appState.State == ViewState.BoardConfig)
+            {
+                return await _getEpicsQueryHandler.QueryAsync(new GetEpicsQuery { BoardId = _appState.BoardId });
+            }
+            else
+            {
+                return Enumerable.Empty<IEntity>();
+            }
+        }
 
         public async Task<IEntity> UpsertEntityAsync(IEntity entity, IEnumerable<IEntity> parentEntities)
         {
@@ -128,7 +148,7 @@ namespace RichText.Services
                 await _upsertEpicCommandHandler.HandleAsync(new UpsertEpicCommand
                 {
                     Epic = epic,
-                    ProjectId = "16100" // MAGIC
+                    ProjectId = _appState.ProjectId
                 });
                 return epic;
             }
@@ -138,7 +158,7 @@ namespace RichText.Services
                 await _upsertUserStoryCommandHandler.HandleAsync(new UpsertUserStoryCommand
                 {
                     EpicId = parentEpic.Id,
-                    ProjectId = "16100", // MAGIC
+                    ProjectId = _appState.ProjectId,
                     UserStory = userStory
                 });
                 return userStory;
@@ -149,7 +169,7 @@ namespace RichText.Services
                 await _upsertSubTaskCommandHandler.HandleAsync(new UpsertSubTaskCommand
                 {
                     ParentId = parentUserStory.Id,
-                    ProjectId = "16100", // MAGIC
+                    ProjectId = _appState.ProjectId,
                     SubTask = subTask
                 });
                 return subTask;

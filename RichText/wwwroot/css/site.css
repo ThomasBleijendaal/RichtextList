@@ -7,6 +7,21 @@ html, body {
     padding: 0;
 }
 
+.btn.btn-link {
+    padding: 0;
+    border: 0;
+    vertical-align: top;
+}
+
+.sign-in, .configure-board {
+    background: #fff;
+    padding: 1rem;
+    margin: 1rem auto;
+    max-width: 50rem;
+    display: block;
+    box-shadow: 0 6.4px 14.4px 0 rgba(0,0,0,.132),0 1.2px 3.6px 0 rgba(0,0,0,.108);
+}
+
 .list-editor {
     background: #fff;
     padding: 1rem;

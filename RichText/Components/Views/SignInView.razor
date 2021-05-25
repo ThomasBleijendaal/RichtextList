@@ -1,0 +1,44 @@
+﻿<div class="sign-in">
+    <h1>Log in</h1>
+
+    <EditForm Model="@Model" OnSubmit="ValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <label class="col-form-label" for="url">JIRA Url</label>
+        <InputText class="form-control" id="url" @bind-Value="@Model.Url" />
+
+        <label class="col-form-label" for="username">Username</label>
+        <InputText class="form-control" id="username" @bind-Value="@Model.Username" />
+
+        <label class="col-form-label" for="password">Password</label>
+        <InputText class="form-control" id="password" type="password" @bind-Value="@Model.Password" />
+
+        <hr />
+
+        <button type="submit" class="btn btn-primary">Sign in</button>
+    </EditForm>
+</div>
+
+@code {
+    [Inject] private IAppState AppState { get; set; } = default!;
+
+    // TODO: move this away from here
+    [Inject] private IQueryHandler<GetMetaQuery, Meta> GetMetaHandler { get; set; } = default!;
+    [Inject] private IQueryHandler<GetFieldQuery, Field> GetFieldHandler { get; set; } = default!;
+
+    private SignInViewModel Model = new SignInViewModel();
+
+    private async Task ValidSubmit(EditContext context)
+    {
+        AppState.ConfigureAuth(Model.Url, Model.Username, Model.Password);
+
+        // TODO: move this away from here
+        var meta = await GetMetaHandler.QueryAsync(new GetMetaQuery());
+        var epicNameField = await GetFieldHandler.QueryAsync(new GetFieldQuery("Epic Name"));
+
+        AppState.ConfigureMeta(meta.Id, meta.EpicIssueType ?? "", epicNameField.Id, meta.UserStoryIssueType ?? "", meta.SubTaskIssueType ?? "");
+
+        StateHasChanged();
+    }
+} 

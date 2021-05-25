@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -9,9 +10,13 @@ namespace RichText.Handlers.CommandHandlers
 {
     public class UpsertEpicCommandHandler : BaseHandler, ICommandHandler<UpsertEpicCommand>
     {
+        private readonly IAppState _appState;
+
         public UpsertEpicCommandHandler(
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IAppState appState,
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
+            _appState = appState;
         }
 
         public async Task HandleAsync(UpsertEpicCommand command)
@@ -26,17 +31,17 @@ namespace RichText.Handlers.CommandHandlers
                 var response = await PostRequestAsync("/rest/api/2/issue", new
                 {
                     update = new { },
-                    fields = new
+                    fields = new Dictionary<string, object?>
                     {
-                        summary = command.Epic.Name,
-                        customfield_10006 = command.Epic.Name, // MAGIC
-                        project = new
+                        ["summary"] = command.Epic.Name,
+                        [_appState.EpicNamePropertyName] = command.Epic.Name,
+                        ["project"] = new
                         {
                             id = command.ProjectId
                         },
-                        issuetype = new
+                        ["issuetype"] = new
                         {
-                            id = "10000" // MAGIC
+                            id = _appState.EpicIssueType
                         }
                     }
                 });
@@ -55,10 +60,10 @@ namespace RichText.Handlers.CommandHandlers
                 await PutRequestAsync($"/rest/api/2/issue/{command.Epic.Id}", new
                 {
                     update = new { },
-                    fields = new
+                    fields = new Dictionary<string, string?>
                     {
-                        summary = command.Epic.Name,
-                        customfield_10006 = command.Epic.Name // MAGIC
+                        ["summary"] = command.Epic.Name,
+                        [_appState.EpicNamePropertyName] = command.Epic.Name
                     }
                 });
             }

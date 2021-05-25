@@ -9,12 +9,15 @@ namespace RichText.Handlers.CommandHandlers
 {
     public class UpsertUserStoryCommandHandler : BaseHandler, ICommandHandler<UpsertUserStoryCommand>
     {
+        private readonly IAppState _appState;
         private readonly ICommandHandler<AssignToEpicCommand> _assignToEpicCommandHandler;
 
         public UpsertUserStoryCommandHandler(
+            IAppState appState,
             ICommandHandler<AssignToEpicCommand> assignToEpicCommandHandler,
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
+            _appState = appState;
             _assignToEpicCommandHandler = assignToEpicCommandHandler;
         }
 
@@ -39,7 +42,7 @@ namespace RichText.Handlers.CommandHandlers
                         },
                         issuetype = new
                         {
-                            id = "10001" // MAGIC
+                            id = _appState.UserStoryIssueType
                         },
                         description = "TODO" // TODO
                     }

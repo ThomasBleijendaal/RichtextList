@@ -1,0 +1,21 @@
+﻿<div class="list-editor">
+    @if (State != null)
+    {
+        <ListEditor State="State" />
+    }
+</div>
+
+@code {
+    [Inject] private IEntityService EntityService { get; set; } = default!;
+
+
+    private ListState? State { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var entities = await EntityService.GetListAsync();
+
+        State = new ListState(EntityService, entities, default, Enumerable.Empty<IEntity>(), default);
+    }
+
+}

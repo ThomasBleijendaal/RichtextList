@@ -4,15 +4,20 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using RichText.Abstractions;
 
 namespace RichText.Handlers
 {
     public class BaseHandler
     {
+        private readonly IAppState _appState;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public BaseHandler(IHttpClientFactory httpClientFactory)
+        public BaseHandler(
+            IAppState appState,
+            IHttpClientFactory httpClientFactory)
         {
+            _appState = appState;
             _httpClientFactory = httpClientFactory;
         }
 
@@ -58,8 +63,13 @@ namespace RichText.Handlers
             response.EnsureSuccessStatusCode();
         }
 
-        private static HttpRequestMessage CreateMethod(HttpMethod method, string path)
+        private HttpRequestMessage CreateMethod(HttpMethod method, string path)
         {
+            // TODO: implement OAuth
+            var request = new HttpRequestMessage(method, $"{_appState.Url}{path}");
+            var basicAuthentication = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{_appState.Username}:{_appState.Password}"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicAuthentication);
+            return request;
         }
 
     }

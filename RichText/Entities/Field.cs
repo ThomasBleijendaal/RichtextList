@@ -4,16 +4,9 @@ using RichText.Abstractions;
 
 namespace RichText.Entities
 {
-    public class Epic : IEntity
+    public class Field : IEntity
     {
-        public Epic(string id, string? key, string? name)
-        {
-            Id = id;
-            Key = key;
-            Name = name;
-        }
-
-        public Epic()
+        public Field()
         {
             Id = $"new{Guid.NewGuid()}";
         }
@@ -21,11 +14,11 @@ namespace RichText.Entities
         public string Id { get; set; }
         public string? Key { get; set; }
         public string? Name { get; set; }
-        public string? Color { get; set; }
 
         public IEnumerable<IEntity>? SubEntities { get; set; }
 
-        public bool IsSaveable => !string.IsNullOrWhiteSpace(Name);
-        public bool IsNew => Id?.Contains("new") ?? true;
+        public bool IsSaveable => false;
+
+        public bool IsNew => false;
     }
 }

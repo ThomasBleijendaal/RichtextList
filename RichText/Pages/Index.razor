@@ -1,21 +1,34 @@
 ﻿@page "/"
+@implements IDisposable
 
-<div class="list-editor">
-    @if (State != null)
-    {
-        <ListEditor State="State" />
-    }
-</div>
+@if (State.State == ViewState.NoConfig)
+{
+    <SignInView />
+}
+else if (State.State == ViewState.NoBoardConfig)
+{
+    <ConfigureBoardView />
+}
+else if (State.State == ViewState.BoardConfig)
+{
+    <BoardView />
+}
 
 @code {
-    [Inject] private IEntityService EntityService { get; set; } = default!;
+    [Inject] private IAppState State { get; set; } = default!;
 
-    private ListState? State { get; set; }
-
-    protected override async Task OnParametersSetAsync()
+    protected override void OnInitialized()
     {
-        var entities = await EntityService.GetListAsync();
+        State.ViewStateChanged += StateChanged;
+    }
 
-        State = new ListState(EntityService, entities, default, Enumerable.Empty<IEntity>(), default);
+    private async void StateChanged(object? sender, ViewState args)
+    {
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    public void Dispose()
+    {
+        State.ViewStateChanged -= StateChanged;
     }
 }

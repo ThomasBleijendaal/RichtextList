@@ -13,9 +13,10 @@ namespace RichText.Handlers.QueryHandlers
         private readonly IQueryHandler<GetUserStoriesQuery, IReadOnlyList<UserStory>> _userStoriesQueryHandler;
 
         public GetEpicsQueryHandler(
+            IAppState appState,
             IResultsResolver<Epic> epicResultsResolver,
             IQueryHandler<GetUserStoriesQuery, IReadOnlyList<UserStory>> userStoriesQueryHandler,
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
             _epicResultsResolver = epicResultsResolver;
             _userStoriesQueryHandler = userStoriesQueryHandler;

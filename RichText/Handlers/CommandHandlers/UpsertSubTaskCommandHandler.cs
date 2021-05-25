@@ -9,9 +9,13 @@ namespace RichText.Handlers.CommandHandlers
 {
     public class UpsertSubTaskCommandHandler : BaseHandler, ICommandHandler<UpsertSubTaskCommand>
     {
+        private readonly IAppState _appState;
+
         public UpsertSubTaskCommandHandler(
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IAppState appState,
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
+            _appState = appState;
         }
 
         public async Task HandleAsync(UpsertSubTaskCommand command)
@@ -35,7 +39,7 @@ namespace RichText.Handlers.CommandHandlers
                         },
                         issuetype = new
                         {
-                            id = "10101" // MAGIC
+                            id = _appState.SubTaskIssueType
                         },
                         parent = new
                         {

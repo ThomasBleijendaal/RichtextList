@@ -16,7 +16,7 @@
                                                       KeyPress="@(async (ev) => await HandleKeyPressAsync(ev, element.Entity))" />
                         </div>
                         <div class="col-auto">
-                            @element.Entity.Key
+                            <a href="@(AppState.Url)/browse/@(element.Entity.Key)" target="_blank">@element.Entity.Key</a>
                         </div>
                     </div>
                     @if (element.NestedList != null)

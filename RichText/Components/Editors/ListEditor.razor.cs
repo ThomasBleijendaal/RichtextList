@@ -7,7 +7,7 @@ using RichText.Enums;
 using RichText.EventArgs;
 using RichText.State;
 
-namespace RichText.Components
+namespace RichText.Components.Editors
 {
     /*
      TODO: more flexible editor inside editor + validation 
@@ -20,6 +20,8 @@ namespace RichText.Components
      */
     public partial class ListEditor : IDisposable
     {
+        [Inject] public IAppState AppState { get; set; } = default!;
+
         [Parameter] public ListState State { get; set; } = default!;
 
         private string? Error { get; set; }

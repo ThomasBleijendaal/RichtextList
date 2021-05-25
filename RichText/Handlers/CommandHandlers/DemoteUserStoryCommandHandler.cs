@@ -14,9 +14,10 @@ namespace RichText.Handlers.CommandHandlers
         private readonly ICommandHandler<UpsertSubTaskCommand> _upsertSubTaskCommandHandler;
 
         public DemoteUserStoryCommandHandler(
+            IAppState appState,
             ICommandHandler<DeleteUserStoryCommand> deleteUserStoryCommandHandler,
             ICommandHandler<UpsertSubTaskCommand> upsertSubTaskCommandHandler,
-            IHttpClientFactory httpClientFactory) : base(httpClientFactory)
+            IHttpClientFactory httpClientFactory) : base(appState, httpClientFactory)
         {
             _deleteUserStoryCommandHandler = deleteUserStoryCommandHandler;
             _upsertSubTaskCommandHandler = upsertSubTaskCommandHandler;
